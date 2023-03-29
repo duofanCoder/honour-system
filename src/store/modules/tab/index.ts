@@ -23,7 +23,7 @@ export const useTabStore = defineStore('app-tab', {
     tabs: [],
     homeTab: {
       name: 'admin-root',
-      fullPath: '/admin/index',
+      fullPath: '/admin/root',
       meta: {
         title: '列表',
       },
@@ -49,7 +49,9 @@ export const useTabStore = defineStore('app-tab', {
     },
     /** 缓存页签路由数据 */
     cacheTabRoutes() {
-      useStorage('multiTabRoutes', this.tabs);
+      const store = useStorage('multiTabRoutes', this.tabs);
+      store.value=this.tabs;
+      console.log(this.tabs);
       // window.localStorage.setItem('multiTabRoutes', this.tabs);
     },
     /**

@@ -25,11 +25,11 @@ export default defineConfig({
     }),
     Pages({
       extendRoute(route, parent) {
-        console.log(route.name);
         if (route.name != undefined && route.name.indexOf('admin') != -1) {
+          const title = route.name.replace('admin-', '');
           return {
             ...route,
-            meta: { admin: true, auth: true },
+            meta: { admin: true, auth: true,title:title },
           };
         }
         if (route.path.indexOf('/profile') == -1) {

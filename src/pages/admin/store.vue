@@ -1,3 +1,7 @@
 <template>
-  <div> 库苦苦 </div>
+  <div>
+    <el-card class="h-full">
+      酷酷酷 
+    </el-card>
+    </div>
 </template>

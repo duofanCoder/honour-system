@@ -16,19 +16,19 @@
           <template #title>
             <span>荣誉管理</span>
           </template>
-          <el-menu-item index="admin-root"> 荣誉列表 </el-menu-item>
-          <el-menu-item index="admin-approve">荣誉审批</el-menu-item>
-          <el-menu-item index="admin-store">荣誉库</el-menu-item>
+          <el-menu-item index="/admin/root"> 荣誉列表 </el-menu-item>
+          <el-menu-item index="/admin/approve">荣誉审批</el-menu-item>
+          <el-menu-item index="/admin/store">荣誉库</el-menu-item>
         </el-sub-menu>
         <el-sub-menu index="2">
           <template #title>
             <span>用户管理</span>
           </template>
-          <el-menu-item index="admin-user">用户管理</el-menu-item>
+          <el-menu-item index="/admin/user">用户管理</el-menu-item>
         </el-sub-menu>
       </el-menu>
     </div>
-    <div class="w-full flex flex-col w-[calc(100vw-240px)]">
+    <div class="w-full h-full flex flex-col w-[calc(100vw-240px)]   ">
       <div class="flex px-4 w-full border-b border-gray-100">
         <div class="flex gap-4 ml-auto py-4">
           <div class="self-center cursor-pointer">
@@ -62,18 +62,22 @@
         </div>
       </div>
 
-      <el-tabs class="px-8 mt-4 flex flex-col" type="card" closable @tab-remove="removeTab">
+      <el-tabs class="px-6 mt-4 flex flex-col" type="card"
+      @tab-click="tabClick"
+      v-model="tabsMenuValue"
+       @tab-remove="tabRemove">
         <el-tab-pane
           v-for="item in tab.tabs"
           :key="item.fullPath"
-          :label="item.name?.toString()"
+          :closable="item.meta.title?.toString() != 'root'"
+          :label="item.meta.title?.toString()"
           :name="item.name?.toString()"
         >
-          <div>
-            <router-view></router-view>
-          </div>
-        </el-tab-pane>
+      </el-tab-pane>
       </el-tabs>
+      <div class="px-5.5">
+        <router-view></router-view>
+      </div>
     </div>
   </div>
 </template>
@@ -82,22 +86,46 @@
   import { watch } from 'vue';
   import { useTabStore } from '@/store';
   import { useRoute, useRouter } from 'vue-router';
+  import { ref } from 'vue';
+  import { TabsPaneContext } from 'element-plus/es/components/tabs';
+  import { onMounted } from 'vue';
   const tab = useTabStore();
   const route = useRoute();
   const router = useRouter();
+
+  const tabsMenuValue=ref(route.fullPath)
   const handleOpen = (key: string, keyPath: string[]) => {
-    router.push({ name: key });
+    router.push({ path: key });
+  };
+  
+
+  // Tab Click
+  const tabClick = (tabItem: TabsPaneContext) => {
+    const name = tabItem.props.name as string;
+    router.push({name:name});
   };
 
-  const removeTab = () => {
-    console.log('remove');
-  };
+// Remove Tab
+const tabRemove = (name: any) => {
+  const nameR =name as string;
+  const nameS =nameR.replace('-','/')
+  tab.removeTab("/"+nameS);
+};
 
+// 初始化需要固定的标签
+const initTabs = () => {
+  tab.iniTabStore(route)
+};
+
+onMounted(() => {
+  initTabs();
+})
   watch(
     () => route.fullPath,
     () => {
       tab.addTab(route);
       tab.setActiveTab(route.fullPath);
+      tab.cacheTabRoutes();
     }
   );
 </script>
