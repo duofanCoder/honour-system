@@ -11,9 +11,10 @@ export async function createPermissionGuard(
   const needLogin = Boolean(to.meta?.auth);
   const needAdmin = Boolean(to.meta?.admin);
   const userStore = useUserStore();
-  const isAdmin = false;
-  const isLogin = Boolean(getToken());
-
+  // const isAdmin = false;
+  const isAdmin = true;
+  // const isLogin = Boolean(getToken());
+  const isLogin = true;
   // needLogin:true
   // permission.ts:18 needAdmin:true
   // permission.ts:19 isAdmin:false

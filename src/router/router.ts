@@ -20,7 +20,7 @@ export function useRouterPush(inSetup: boolean = true) {
       const routerData = router.resolve(to);
       window.open(routerData.href, '_blank');
     } else {
-      router.push(to);
+      return router.push(to);
     }
   }
 

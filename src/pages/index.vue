@@ -36,6 +36,14 @@
         <HonourCard />
       </div>
     </div>
+    <!-- footer -->
+    <div class="flex justify-between lg:px-60 md:px-50 sm:px-30 px-20 py-8 bg-gray-100">
+      <div>联系我们</div>
+      <div>关于我们</div>
+      <div>使用帮助</div>
+      <div>免责声明</div>
+      <div>隐私政策</div>
+    </div>
   </div>
 </template>
 <script setup lang="ts">

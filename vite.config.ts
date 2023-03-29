@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import AutoImport from 'unplugin-auto-import/vite';
 import Components from 'unplugin-vue-components/vite';
-import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
+import { ElementPlusResolver } from 'unplugin-vue-components/resolvers';
 import { resolve } from 'path';
 import Icons from 'unplugin-icons/vite';
 import IconsResolver from 'unplugin-icons/resolver';
@@ -21,13 +21,11 @@ export default defineConfig({
       autoInstall: true,
     }),
     Components({
-      resolvers: [IconsResolver(), ElementPlusResolver()],
+      resolvers: [IconsResolver({}), ElementPlusResolver()],
     }),
     Pages({
       extendRoute(route, parent) {
-        if (route.name == 'admin-login') {
-          return route;
-        }
+        console.log(route.name);
         if (route.name != undefined && route.name.indexOf('admin') != -1) {
           return {
             ...route,

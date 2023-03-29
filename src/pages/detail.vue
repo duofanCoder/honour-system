@@ -27,7 +27,7 @@
         </el-carousel-item>
       </el-carousel>
     </div>
-    <div class="flex justify-center lg:px-60 md:px-50 sm:px-30 px-20">
+    <div class="flex justify-center lg:px-60 md:px-50 sm:px-30 px-20 mb-20">
       <div class="flex flex-col w-1/2 bg-[#31CCEC] h-80 text-white">
         <div class="ml-20 mt-5 space-y-5">
           <div class="mt-12"> <span>| </span><span>标题</span> </div>
@@ -36,13 +36,21 @@
         </div>
       </div>
       <div class="flex flex-col w-1/2">
-        <div class="bg-teal-200 text-center h-20">获奖人</div>
-        <div class="w-full h-full">
-          老师：张三、李四、王五
-          <br />
-          学生：张三、李四、王五
+        <div class="flex bg-teal-200 h-16 justify-center"><span class="my-auto">获奖人</span></div>
+        <div class="w-full h-full flex justify-center bg-violet-300">
+          <div class="self-center flex gap-4 flex-col">
+            <span>老师：张三、李四、王五</span>
+            <span>学生：张三、李四、王五</span>
+          </div>
         </div>
       </div>
+    </div>
+    <div class="flex justify-between lg:px-60 md:px-50 sm:px-30 px-20 py-8 bg-gray-100">
+      <div>联系我们</div>
+      <div>关于我们</div>
+      <div>使用帮助</div>
+      <div>免责声明</div>
+      <div>隐私政策</div>
     </div>
   </div>
 </template>
