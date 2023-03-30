@@ -5,7 +5,7 @@
         <h5 class="mb-2 mx-auto">荣誉系统</h5>
       </div>
       <el-menu
-        default-active="1-1"
+        :default-active="route.fullPath"
         background-color="#545c64"
         text-color="#fff"
         active-text-color="#ffd04b"
@@ -28,7 +28,7 @@
         </el-sub-menu>
       </el-menu>
     </div>
-    <div class="w-full h-full flex flex-col w-[calc(100vw-240px)]   ">
+    <div class="w-full h-full flex flex-col w-[calc(100vw-240px)]">
       <div class="flex px-4 w-full border-b border-gray-100">
         <div class="flex gap-4 ml-auto py-4">
           <div class="self-center cursor-pointer">
@@ -62,10 +62,13 @@
         </div>
       </div>
 
-      <el-tabs class="px-6 mt-4 flex flex-col" type="card"
-      @tab-click="tabClick"
-      v-model="tabsMenuValue"
-       @tab-remove="tabRemove">
+      <el-tabs
+        class="px-6 mt-4 flex flex-col"
+        type="card"
+        @tab-click="tabClick"
+        v-model="tabsMenuValue"
+        @tab-remove="tabRemove"
+      >
         <el-tab-pane
           v-for="item in tab.tabs"
           :key="item.fullPath"
@@ -73,7 +76,7 @@
           :label="item.meta.title?.toString()"
           :name="item.name?.toString()"
         >
-      </el-tab-pane>
+        </el-tab-pane>
       </el-tabs>
       <div class="px-5.5">
         <router-view></router-view>
@@ -93,33 +96,36 @@
   const route = useRoute();
   const router = useRouter();
 
-  const tabsMenuValue=ref(route.fullPath)
+  const tabsMenuValue = ref(route.fullPath);
   const handleOpen = (key: string, keyPath: string[]) => {
     router.push({ path: key });
   };
-  
 
   // Tab Click
   const tabClick = (tabItem: TabsPaneContext) => {
     const name = tabItem.props.name as string;
-    router.push({name:name});
+    router.push({ name: name });
   };
 
-// Remove Tab
-const tabRemove = (name: any) => {
-  const nameR =name as string;
-  const nameS =nameR.replace('-','/')
-  tab.removeTab("/"+nameS);
-};
+  // Remove Tab
+  const tabRemove = (name: any) => {
+    const nameR = name as string;
+    const nameS = nameR.replace('-', '/');
+    tab.removeTab('/' + nameS);
+  };
 
-// 初始化需要固定的标签
-const initTabs = () => {
-  tab.iniTabStore(route)
-};
+  // 初始化需要固定的标签
+  const initTabs = () => {
+    tab.iniTabStore(route);
+    if (tab.tabs.length == 0) {
+      tab.setActiveTab('/admin/root');
+      tab.addTab(route);
+    }
+  };
 
-onMounted(() => {
-  initTabs();
-})
+  onMounted(() => {
+    initTabs();
+  });
   watch(
     () => route.fullPath,
     () => {

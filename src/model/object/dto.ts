@@ -46,16 +46,14 @@ export declare namespace Dto {
 
   interface User {
     id: number;
-    username: string;
-    nickname: string;
+    name: string;
     password: string;
-    email: string;
-    wechat: string;
-    bilibili: string;
+    userType: string;
+    role: string;
+    clazz: string;
     gender: boolean;
     avatar: string;
-    birth: Date;
-    mobile: string;
+    phone: string;
   }
 
   interface CampaignIntro {
