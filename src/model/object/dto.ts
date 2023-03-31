@@ -1,22 +1,3 @@
-import { AssetType, JournalType } from '@/model';
-
-export enum CampaignState {
-  DRAFT_FIRST = '草稿',
-  AUDIT_FIRST = '审核中',
-  REJECT_FIRST = '审核未通过',
-  UNDERWAY_FIRST = '孵化中',
-  SUCCESS_FIRST = '孵化成功',
-  FAIL_FIRST = '审核中',
-  FINISH_FIRST = '孵化已过时',
-  DRAFT_SECOND = '草稿',
-  AUDIT_SECOND = '审核中',
-  REJECT_SECOND = '审核未通过',
-  UNDERWAY_SECOND = '众筹中',
-  SUCCESS_SECOND = '众筹成功',
-  FAIL_SECOND = '众筹失败',
-  FINISH_SECOND = '众筹已过时',
-}
-
 export declare namespace Dto {
   // header
   interface File {
@@ -39,86 +20,55 @@ export declare namespace Dto {
   }
 
   interface Page<T> {
-    currentPage: number;
-    data: Array<T>;
-    totalPage: number;
+    total?: number;
+    pageNum: number;
+    data?: Array<T>;
+    pageSize: number;
+    orderBy?: string;
   }
 
   interface User {
     id: number;
     name: string;
+    username: string;
     password: string;
     userType: string;
+    age: number;
     role: string;
     clazz: string;
     gender: boolean;
     avatar: string;
     phone: string;
   }
-
-  interface CampaignIntro {
+  interface Honour {
     id: number;
-    categoryId: number;
-    posterImg: string;
     title: string;
     description: string;
-    location: string;
-    totalMoney: number;
-    currentMoney: number;
-    category: Category;
-    endTime: Date;
-    supportCount: number;
-    campaignDetailId: number;
-    isEye: boolean;
-    owner: User;
-    createTime: Date;
+    createTime: string;
+    updateTime: string;
+    actTime: string;
+    actTea: User[];
+    actStu: User[];
+    levelId: number;
+    grade: string;
+    gradeId: number;
+    level: string;
+    aproveStatus: string;
+    recommendStatus: string;
+    createUser: string;
   }
 
-  interface Asset {
+  interface History {
     id: number;
-    assetType: AssetType;
-    url: string;
-    campaignDetailId: number;
-  }
-
-  enum SourceType {
-    video,
-    image,
-  }
-
-  interface Journal {
-    id: number;
-    createTime: Date;
     title: string;
     description: string;
-    journalType: JournalType;
-    content: string;
-    campaignDetailId: number;
-    posterImg: string;
-    owner: User;
+    createTime: string;
+    updateTime: string;
+    honourId: number;
+    reason: string;
+    color: string;
+    remark: string;
   }
-
-  interface Faq {
-    id: number;
-    question: string;
-    answer: string;
-    campaignDetailId: number;
-  }
-
-  interface CampaignDetail {
-    id: number;
-    assetIds: number[];
-    faqsIds: number[];
-    journalIds: number[];
-    perkIds: number[];
-    story: Journal;
-    perkList: Array<Perk>;
-    assetList: Array<Asset>;
-    faqList: Array<Faq>;
-    journalList: Array<Journal>;
-    campaignIntro: CampaignIntro;
-  }
-
   interface File {
     size: number;
     suffix: string;
