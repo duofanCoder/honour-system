@@ -3,7 +3,7 @@
     <el-card>
       <ProTable
           ref="proTable"
-          title="用户列表"
+          title="荣誉列表"
           :columns="columns"
           :requestApi="getTableList"
           :initParam="initParam"
@@ -13,15 +13,15 @@
         <template #tableHeader="scope">
 
           <el-button
-              type="primary" :icon="CirclePlus" @click="openDrawer('新增')">新增用户
+              type="primary" :icon="CirclePlus" @click="openDrawer('新增')">新增荣誉
           </el-button>
           <el-button
-              type="primary" :icon="Download" plain @click="downloadFile">导出用户数据
+              type="primary" :icon="Download" plain @click="downloadFile">导出荣誉数据
           </el-button>
           <el-button
               type="danger" :icon="Delete" plain @click="batchDelete(scope.selectedListIds)"
               :disabled="!scope.isSelected">
-            批量删除用户
+            批量删除荣誉
           </el-button>
         </template>
         <!-- createTime -->
@@ -34,24 +34,22 @@
         <template #operation="scope">
           <el-button type="primary" link :icon="View" @click="openDrawer('查看', scope.row)">查看</el-button>
           <el-button type="primary" link :icon="EditPen" @click="openDrawer('编辑', scope.row)">编辑</el-button>
-          <el-button type="primary" link :icon="Refresh" @click="resetPass(scope.row)">重置密码</el-button>
-          <el-button type="primary" link :icon="Delete" @click="deleteAccount(scope.row)">删除</el-button>
+          <el-button type="primary" link :icon="Delete" @click="deleteHonour(scope.row)">删除</el-button>
         </template>
       </ProTable>
+      <UserDrawer ref="useDrawerRef"/>
     </el-card>
-    <UserDrawer ref="userDrawerRef"/>
   </div>
 </template>
 
 <script setup lang="ts">
 
 import {ColumnProps} from "@/components/common/ProTable/interface";
-import {clazzOptions, Dto, roleOptions} from "@/model";
+import {categoryOptions, Dto, levelOptions, termOptions} from "@/model";
 import {reactive, ref, toRaw, unref} from "vue";
-import {fetchQueryUser, fetchRemoveUser, fetchSaveUser, fetchUpdateUser} from "@/service";
+import {fetchQueryHonour, fetchRemoveHonour, fetchSaveHonour, fetchUpdateHonour} from "@/service";
 import {useRouter} from "vue-router";
-import {CirclePlus, Delete, Download, EditPen, Refresh, View} from "@element-plus/icons-vue";
-import UserDrawer from './components/UserDrawer.vue';
+import {CirclePlus, Delete, Download, EditPen, View} from "@element-plus/icons-vue";
 import {useHandleData} from "@/hooks";
 import {covertToEnumProps} from "@/utils/common";
 
@@ -81,7 +79,7 @@ const getTableList = (params: any) => {
   console.log(unref(toRaw(params)));
   let newParams = JSON.parse(JSON.stringify(params));
   newParams.username && (newParams.username = "custom-" + newParams.username);
-  return fetchQueryUser(newParams);
+  return fetchQueryHonour(newParams);
 };
 
 // 表格配置项
@@ -89,44 +87,47 @@ const columns: ColumnProps[] = [
   {type: "selection", fixed: "left", width: 80},
   {type: "index", label: "#", width: 80},
   {
-    prop: "username",
-    label: "用户名", width: 120,
-
+    prop: "title",
+    label: "荣誉名称", width: 120,
   }, {
-    prop: "name",
-    label: "姓名",
+    prop: "levelId",
+    label: "级别",
     width: 150,
-    search: {el: "input"}
+    search: {el: "select", props: {filterable: true}},
+    enum: covertToEnumProps(levelOptions),
+    fieldNames: {label: "dictLabel", value: "dictValue"}
   }, {
-    prop: "age",
+    prop: "categoryId",
     width: 70,
-    label: "年龄",
-  },
-  {
-    prop: "clazz",
-    label: "班级", width: 140,
+    label: "类别",
     search: {el: "select", props: {filterable: true}},
-    enum: covertToEnumProps(clazzOptions),
+    enum: covertToEnumProps(categoryOptions),
     fieldNames: {label: "dictLabel", value: "dictValue"}
   },
   {
-    prop: "role",
-    label: "角色", width: 70,
-    search: {el: "select", props: {filterable: true}},
-    enum: covertToEnumProps(roleOptions),
-    fieldNames: {label: "dictLabel", value: "dictValue"}
+    prop: "actTeach",
+    label: "关联教师", width: 140,
+    search: {el: "input"},
   },
   {
-    prop: "createTime",
-    label: "创建时间",
+    prop: "actStu",
+    label: "关联学生", width: 140,
+    search: {el: "input"},
+  },
+  {
+    prop: "term",
+    label: "学期",
     width: 130,
+    search: {el: "select", props: {filterable: true}},
+    enum: covertToEnumProps(termOptions),
+    fieldNames: {label: "dictLabel", value: "dictValue"}
   },
   {prop: "operation", label: "操作", fixed: "right", width: 300}
 ];
 
 // 删除用户信息
-const deleteAccount = async (params: Dto.User) => {
-  await useHandleData(fetchRemoveUser, {ids: [params.id]}, `删除【${params.name}】用户`);
+const deleteHonour = async (params: Dto.Honour) => {
+  await useHandleData(fetchRemoveHonour, {ids: [params.id]}, `删除【${params.name}】用户`);
   proTable.value.getTableList();
 };
 
@@ -137,12 +138,12 @@ const batchDelete = async (id: string[]) => {
 };
 
 // 重置用户密码
-const resetPass = async (params: Dto.User) => {
+const resetPass = async (params: Dto.Honour) => {
   proTable.value.getTableList();
 };
 
 // 切换用户状态
-const changeStatus = async (row: Dto.User) => {
+const changeStatus = async (row: Dto.Honour) => {
   proTable.value.getTableList();
 };
 
@@ -157,17 +158,18 @@ const downloadFile = async () => {
 const dialogRef = ref();
 
 // 打开 drawer(新增、查看、编辑)
-const userDrawerRef = ref();
-const openDrawer = (title: string, rowData: Partial<Dto.User> = {}) => {
+const useDrawerRef = ref();
+const openDrawer = (title: string, rowData: Partial<Dto.Honour> = {}) => {
   let params = {
     title,
     rowData: {...rowData},
     isView: title === "查看",
-    api: title === "新增" ? fetchSaveUser : title === "编辑" ? fetchUpdateUser : "",
+    api: title === "新增" ? fetchSaveHonour : title === "编辑" ? fetchUpdateHonour : "",
     getTableList: proTable.value.getTableList
   };
-  userDrawerRef.value.acceptParams(params);
+  useDrawerRef.value.acceptParams(params);
 };
+
 
 </script>
 

@@ -29,6 +29,23 @@
       </el-menu>
     </div>
     <div class="w-full h-full flex flex-col w-[calc(100vw-240px)]">
+    <div class="flex ">
+      <el-tabs
+        class="px-6 mt-4 flex flex-col"
+        type="card"
+        @tab-click="tabClick"
+        v-model="tabsMenuValue"
+        @tab-remove="tabRemove"
+      >
+        <el-tab-pane
+          v-for="item in tab.tabs"
+          :key="item.fullPath"
+          :closable="item.meta.title?.toString() != 'root'"
+          :label="item.meta.title?.toString()"
+          :name="item.name?.toString()"
+        >
+        </el-tab-pane>
+      </el-tabs>
       <div class="flex px-4 w-full border-b border-gray-100">
         <div class="flex gap-4 ml-auto py-4">
           <div class="self-center cursor-pointer">
@@ -61,23 +78,7 @@
           </div>
         </div>
       </div>
-
-      <el-tabs
-        class="px-6 mt-4 flex flex-col"
-        type="card"
-        @tab-click="tabClick"
-        v-model="tabsMenuValue"
-        @tab-remove="tabRemove"
-      >
-        <el-tab-pane
-          v-for="item in tab.tabs"
-          :key="item.fullPath"
-          :closable="item.meta.title?.toString() != 'root'"
-          :label="item.meta.title?.toString()"
-          :name="item.name?.toString()"
-        >
-        </el-tab-pane>
-      </el-tabs>
+</div>
       <div class="px-5.5">
         <router-view></router-view>
       </div>

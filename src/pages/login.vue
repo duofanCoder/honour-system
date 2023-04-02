@@ -60,7 +60,7 @@
     //   router.push("/home");
     // }
     // });
-    router.push({ path: '/admin' });
+    router.push({ path: '/admin/root' });
     console.log('hello');
   };
 </script>
