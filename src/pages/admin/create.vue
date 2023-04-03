@@ -89,10 +89,22 @@
               <el-form-item label="获得者">
                 <el-button class="my-0" type="primary" @click="handleTabAction('add')">添加</el-button>
                 <el-table :data="actTableData" style="width: 700px; height: 600px;">
-                  <el-table-column prop="id" label="序号"/>
+                  <el-table-column prop="index" label="序号"/>
                   <el-table-column prop="name" label="姓名"/>
-                  <el-table-column prop="role" label="类型"/>
-                  <el-table-column prop="clazz" label="班级" width="120"/>
+                  <el-table-column prop="role" label="角色">
+                    <template #default="{ row }">
+                      <div class="w-full flex  space-x-0">
+                        {{ row.role === "1" ?  '教师':"学生" }}
+                      </div>
+                    </template>
+                  </el-table-column>
+                  <el-table-column prop="clazz" label="班级" width="120">
+                    <template #default="{ row }">
+                      <div class="w-full flex  space-x-0">
+                        {{ getClazzLabel(row.clazz) }}
+                      </div>
+                    </template>
+                  </el-table-column>
                   <el-table-column label="操作">
                     <template #default="{ row }">
                       <div class="w-full flex  space-x-0">
@@ -109,79 +121,29 @@
       </el-scrollbar>
     </el-card>
   </div>
-  <el-drawer v-model="drawerVisible" :destroy-on-close="true" size="850px" title="获奖人添加">
-    <div class="flex flex-col gap-4">
-      <div class="flex flex-row  items-center">
-        <div class="w-12">姓名：</div>
-        <el-input v-model="drawerModelName" size="large" class="w-120" placeholder="请输入姓名"></el-input>
-      </div>
-      <div class="flex flex-col">
-        <div>
-          <!-- 选项卡 -->
-          <el-tabs v-model="tabSelectRef" type="border-card" @tab-click="handleTabClick">
-            <el-tab-pane label="已选择" name="1">
-              <el-table :data="actTableData" style="width: 100%">
-                <el-table-column prop="id" label="序号" width="80"/>
-                <el-table-column prop="name" label="姓名"/>
-                <el-table-column prop="role" label="类型"/>
-                <el-table-column prop="clazz" label="班级" width="120"/>
-                <el-table-column label="操作">
-                  <template #default="{ row }">
-                    <div class="w-full flex  space-x-0">
-                      <el-button size="small" @click="handleTabAction('remove',row)">删除</el-button>
-                    </div>
-                  </template>
-                </el-table-column>
-              </el-table>
-              <el-pagination background layout="prev, pager, next" :total="actTableData.length"/>
-            </el-tab-pane>
-            <el-tab-pane label="教师" name="2">
-              <el-table :data="teacherTableData" style="width: 100%">
-                <el-table-column prop="id" label="序号" width="80"/>
-                <el-table-column prop="name" label="姓名"/>
-                <el-table-column prop="role" label="类型"/>
-                <el-table-column prop="clazz" label="班级" width="120"/>
-                <el-table-column label="操作">
-                  <template #default="{ row }">
-                    <div class="w-full flex  space-x-0">
-                      <el-button size="small" @click="handleTabAction('add',row)">添加</el-button>
-                    </div>
-                  </template>
-                </el-table-column>
-              </el-table>
-            </el-tab-pane>
-            <el-tab-pane label="学生" name="3">
-              <el-table :data="studentTableData" style="width: 100%">
-                <el-table-column prop="id" label="序号" width="80"/>
-                <el-table-column prop="name" label="姓名"/>
-                <el-table-column prop="role" label="类型"/>
-                <el-table-column prop="clazz" label="班级" width="120"/>
-                <el-table-column label="操作">
-                  <template #default="{ row }">
-                    <div class="w-full flex  space-x-0">
-                      <el-button size="small" @click="handleTabAction('add',row)">添加</el-button>
-                    </div>
-                  </template>
-                </el-table-column>
-              </el-table>
-            </el-tab-pane>
-          </el-tabs>
-
-        </div>
-      </div>
-    </div>
-  </el-drawer>
+ 
+  <LeftDrawer ref="leftDrawerRef" @set-honour-title-event="setHonourTitleEvent" @set-stu-event="setStuEvent" @set-teach-event="setTeachEvent"></LeftDrawer>
+  <RightDrawer ref="rightDrawerRef" @right-add-event="rightAddEvent"/>
 </template>
 
 <script setup lang="ts">
 import {Plus} from '@element-plus/icons-vue'
 import {reactive, ref} from "vue";
-import {categoryOptions, Dto, levelOptions} from "@/model";
+import {categoryOptions, clazzOptions, Dto, levelOptions} from "@/model";
 import UploadImg from "@/components/common/Upload/Img.vue";
 import getTextFromImage from "@/service/api/img2word";
+import LeftDrawer from './components/LeftDrawer.vue';
+import RightDrawer from './components/RightDrawer.vue';
+import { unref } from 'vue';
+import { toRaw } from 'vue';
 
+
+// clazzOptions通过value 获取label 
+const getClazzLabel = (value: string) => {
+  return clazzOptions.find(item => item.value === value)?.label
+}
 const imageUrl = ref('')
-const imgWordList = ref([])
+const leftDrawerRef = ref<any>(null)
 
 
 const handleImg2Word = async () => {
@@ -189,10 +151,9 @@ const handleImg2Word = async () => {
     ElMessage.error('请上传图片')
     return
   }
-  imgWordList.value = await getTextFromImage(imageUrl.value)
+  leftDrawerRef.value.acceptParams( {drawer:true,rowData:await getTextFromImage(imageUrl.value)})
 }
 const backRoot = () => {
-  console.log('backRoot')
   ElMessage.info('backRoot')
 }
 
@@ -229,45 +190,43 @@ const handlePictureCardPreview = (file: any) => {
 const handleRemove = (file: any, fileList: any) => {
   console.log(file, fileList)
 }
-
-const getTableData = () => {
-  const data = []
-  for (let i = 1; i <= 3; i++) {
-    data.push({
-      id: i,
-      name: '张三',
-      role: '学生',
-      clazz: '软件工程1班'
-    })
-  }
-  return data
-}
-const actTableData = reactive(getTableData())
-const drawerVisible = ref(false);
-const drawerModelName = ref('');
-const tabSelectRef = ref('1');
-
-const handleTabAction = (action: string, row?: any) => {
-  if (action === 'add') {
-    drawerVisible.value = true
-    tabSelectRef.value = '1'
-    actTableData.push({
-      id: actTableData.length + 1,
-      name: '张三',
-      role: '学生',
-      clazz: '软件工程1班'
-    })
-  } else if (action === 'remove') {
-    const index = actTableData.indexOf(row)
-    actTableData.splice(index, 1)
+const actTableData = ref<Array<any>>([])
+const rightDrawerRef=ref<any>(null)
+const handleTabAction=(action:string,row?:any)=>{
+  switch (action) {
+    case 'add':
+      rightDrawerRef.value.drawerVisible=true;
+      break;
+    case 'remove':
+      // 删除actTableData
+      actTableData.value.splice(actTableData.value.findIndex((item:any)=>item.id===row.id),1)
+      break;
   }
 }
+const rightAddEvent=(data:any):Boolean=>{
+  console.log("heee");
+  console.log(toRaw(unref(data)));
+  console.log(toRaw(unref(actTableData.value)));
+  
+  // 查询是否存在过了
+  if(actTableData.value.findIndex((item:any)=>item.id===toRaw(unref(data)).id)>-1){
+    ElMessage.error('已存在')
+    return false;
+  }
+  actTableData.value.push(toRaw(unref(data)))
+  return true;
+}
 
-const studentTableData = reactive(getTableData())
-const teacherTableData = reactive(getTableData())
-const handleTabClick = (tab: any) => {
-  console.log(tab)
-  tabSelectRef.value = tab.name
+const setHonourTitleEvent = (data: any) => {
+  honourModel.title = data
+}
+const setStuEvent = (data: any) => {
+  rightDrawerRef.value.drawerVisible=true
+  rightDrawerRef.value.setNameAndRoleEvent(data,"2");
+}
+const setTeachEvent = (data: any) => {
+  rightDrawerRef.value.drawerVisible=true
+  rightDrawerRef.value.setNameAndRoleEvent(data,"1");
 }
 </script>
 

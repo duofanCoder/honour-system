@@ -54,6 +54,7 @@ import {CirclePlus, Delete, Download, EditPen, Refresh, View} from "@element-plu
 import UserDrawer from './components/UserDrawer.vue';
 import {useHandleData} from "@/hooks";
 import {covertToEnumProps} from "@/utils/common";
+import { ElMessageBox } from "element-plus";
 
 const router = useRouter();
 
@@ -62,7 +63,6 @@ const proTable = ref();
 
 // 如果表格需要初始化请求参数，直接定义传给 ProTable(之后每次请求都会自动带上该参数，此参数更改之后也会一直带上，改变此参数会自动刷新表格数据)
 const initParam = reactive({
-  type: 1
 });
 
 // dataCallback 是对于返回的表格数据做处理，如果你后台返回的数据不是 datalist && total && pageNum && pageSize 这些字段，那么你可以在这里进行处理成这些字段
@@ -78,7 +78,6 @@ const dataCallback = (data: any) => {
 // 如果你想在请求之前对当前请求参数做一些操作，可以自定义如下函数：params 为当前所有的请求参数（包括分页），最后返回请求列表接口
 // 默认不做操作就直接在 ProTable 组件上绑定	:requestApi="getUserList"
 const getTableList = (params: any) => {
-  console.log(unref(toRaw(params)));
   let newParams = JSON.parse(JSON.stringify(params));
   newParams.username && (newParams.username = "custom-" + newParams.username);
   return fetchQueryUser(newParams);
@@ -141,10 +140,6 @@ const resetPass = async (params: Dto.User) => {
   proTable.value.getTableList();
 };
 
-// 切换用户状态
-const changeStatus = async (row: Dto.User) => {
-  proTable.value.getTableList();
-};
 
 // 导出用户列表
 const downloadFile = async () => {
@@ -152,9 +147,6 @@ const downloadFile = async () => {
       console.log("导出用户数据")
   );
 };
-
-// 批量添加用户
-const dialogRef = ref();
 
 // 打开 drawer(新增、查看、编辑)
 const userDrawerRef = ref();

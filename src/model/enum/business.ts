@@ -27,6 +27,12 @@ export const roleOptions = [
         value: '3'
     }]
 
+    export const roleOptions1 = [
+        {label: "教师", value: '2'}, {
+            label: "学生",
+            value: '3'
+        }]
+    
 export const approveOptions = [
     {label: "未审核", value: '0'},
     {label: "已审核", value: '1'},

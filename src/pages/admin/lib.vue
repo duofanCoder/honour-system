@@ -54,7 +54,7 @@
 <script setup lang="ts">
   import { ColumnProps } from '@/components/common/ProTable/interface';
   import { categoryOptions, Dto, levelOptions, termOptions } from '@/model';
-  import { reactive, ref, toRaw, unref } from 'vue';
+  import { reactive, ref } from 'vue';
   import {
     fetchQueryHonour,
     fetchRemoveHonour,
@@ -115,7 +115,7 @@
     },
     {
       prop: 'categoryId',
-      width: 70,
+      width: 100,
       sortable: true,
       label: '类别',
       search: { el: 'select', props: { filterable: true } },
@@ -174,10 +174,7 @@
     proTable.value.getTableList();
   };
 
-  // 切换用户状态
-  const changeStatus = async (row: Dto.Honour) => {
-    proTable.value.getTableList();
-  };
+  /
 
   // 导出用户列表
   const downloadFile = async () => {
