@@ -12,8 +12,8 @@
         <!-- 表格 header 按钮 -->
         <template #tableHeader="scope">
           <el-button-group size="default" class="mb-3">
-            <el-button type="primary"> 我创建的</el-button>
-            <el-button type="primary">关联我的</el-button>
+            <el-button type="primary" @click="selectByPage(1)"> 我创建的</el-button>
+            <el-button type="primary" @click="selectByPage(2)">关联我的</el-button>
           </el-button-group>
           <br />
           <el-button type="primary" size="default" :icon="CirclePlus" @click="openDrawer('新增')"
@@ -35,9 +35,6 @@
         </template>
         <!-- 表格操作 -->
         <template #operation="scope">
-          <el-button type="primary" link :icon="View" @click="openDrawer('查看', scope.row)"
-            >查看</el-button
-          >
           <el-button type="primary" link :icon="EditPen" @click="openDrawer('编辑', scope.row)"
             >编辑</el-button
           >
@@ -46,7 +43,6 @@
           >
         </template>
       </ProTable>
-      <UserDrawer ref="useDrawerRef" />
     </el-card>
   </div>
 </template>
@@ -58,24 +54,32 @@
   import {
     fetchQueryHonour,
     fetchRemoveHonour,
-    fetchSaveHonour,
-    fetchUpdateHonour,
   } from '@/service';
   import { useRouter } from 'vue-router';
-  import { CirclePlus, Delete, Download, EditPen, View } from '@element-plus/icons-vue';
+  import { CirclePlus, Delete, Download, EditPen } from '@element-plus/icons-vue';
   import { useHandleData } from '@/hooks';
   import { covertToEnumProps } from '@/utils/common';
+  import { ElMessageBox } from 'element-plus';
 
   const router = useRouter();
-
   // 获取 ProTable 元素，调用其获取刷新数据方法（还能获取到当前查询参数，方便导出携带参数）
   const proTable = ref();
 
   // 如果表格需要初始化请求参数，直接定义传给 ProTable(之后每次请求都会自动带上该参数，此参数更改之后也会一直带上，改变此参数会自动刷新表格数据)
   const initParam = reactive({
     createrUser: undefined,
-    actUser: undefined,
+    actUsers: undefined,
   });
+  const selectByPage=(type: number)=>{
+    if(type===1){
+      initParam.createrUser = '1' as any;
+      initParam.actUsers = undefined;
+    }else{
+      initParam.createrUser = undefined;
+      initParam.actUsers = '1' as any;
+    }
+  }
+
 
   // dataCallback 是对于返回的表格数据做处理，如果你后台返回的数据不是 datalist && total && pageNum && pageSize 这些字段，那么你可以在这里进行处理成这些字段
   const dataCallback = (data: any) => {
@@ -103,6 +107,7 @@
       prop: 'title',
       label: '荣誉名称',
       width: 120,
+      search: { el: 'input' }
     },
     {
       prop: 'levelId',
@@ -159,7 +164,7 @@
 
   // 删除用户信息
   const deleteHonour = async (params: Dto.Honour) => {
-    await useHandleData(fetchRemoveHonour, { ids: [params.id] }, `删除【${params.name}】用户`);
+    await useHandleData(fetchRemoveHonour, { ids: [params.id] }, `删除【${params.title}】用户`);
     proTable.value.getTableList();
   };
 
@@ -169,37 +174,21 @@
     proTable.value.getTableList();
   };
 
-  // 重置用户密码
-  const resetPass = async (params: Dto.Honour) => {
-    proTable.value.getTableList();
-  };
-
-  /
 
   // 导出用户列表
   const downloadFile = async () => {
-    ElMessageBox.confirm('确认导出用户数据?', '温馨提示', { type: 'warning' }).then(() =>
+    ElMessageBox.confirm('确认导出数据?', '温馨提示', { type: 'warning' }).then(() =>
       console.log('导出用户数据')
     );
   };
 
-  // 批量添加用户
-  const dialogRef = ref();
-
-  // 打开 drawer(新增、查看、编辑)
-  const useDrawerRef = ref();
   const openDrawer = (title: string, rowData: Partial<Dto.Honour> = {}) => {
     if (title === '新增') {
       router.push({ path: '/admin/create' });
+    }else{
+      router.push({ path: '/admin/create',query: { id: rowData.id } });
     }
-    let params = {
-      title,
-      rowData: { ...rowData },
-      isView: title === '查看',
-      api: title === '新增' ? fetchSaveHonour : title === '编辑' ? fetchUpdateHonour : '',
-      getTableList: proTable.value.getTableList,
-    };
-    useDrawerRef.value.acceptParams(params);
+    
   };
 </script>
 
