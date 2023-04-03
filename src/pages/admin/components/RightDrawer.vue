@@ -1,13 +1,29 @@
 <template>
-<div>
-  <el-drawer  v-model="drawerVisible" size="60%" title="获奖人添加" :modal="false" append-to-body >
-    <ProTable
+  <el-drawer  v-model="drawer" direction="ltr" border  size="100%" :modal="false"  :z-index="zIndex">
+  <div class="flex flex gap-4">
+  <el-scrollbar height="640px">
+    <el-table :data="drawerProps" style="width: 100%" class="z-1001">
+    <el-table-column type="index" width="50" />
+    <el-table-column prop="word" label="内容" width="200" />
+    <el-table-column  label="操作" >
+        <template #default="scope">
+           <div class="flex flex-col gap-2  mr-4">
+            <el-button class="px-0 mx-0"  link size="small" @click="handleTitle(scope.row)">复制到名称</el-button>
+            <el-button class="px-0 mx-0"  link size="small" @click="handleTeach(scope.row)">关联教师</el-button>
+            <el-button class="px-0 mx-0"  link size="small" @click="handleStu(scope.row)">关联学生</el-button>
+           </div>
+        </template>
+    </el-table-column>
+  </el-table>
+  </el-scrollbar>
+  <ProTable
         ref="proTableRef"
         title="用户列表"
         :columns="columns"
         :requestApi="getTableList"
         :initParam="initParam"
         :dataCallback="dataCallback"
+        class="z-100"
       >
         <!-- 表格操作 -->
         <template #operation="scope">
@@ -15,9 +31,10 @@
             >添加</el-button
           >
         </template>
-      </ProTable>
-  </el-drawer>
+  </ProTable>
 </div>
+
+  </el-drawer>
 </template>
 
 <script setup lang="ts">
@@ -31,8 +48,41 @@ import { reactive } from 'vue';
 import { ref } from 'vue';
 
 const props=defineProps(
-  {drawer: {type: Boolean, default: false}}
+  {drawer: {type: Boolean, default: false},
+  zIndex: {type: Number, default: 1120},
+  drawerOpen: {
+        type: Boolean,
+        default: false,
+    },
+}
 )
+
+const drawerProps = ref([]);
+const drawer=ref(props.drawerOpen)
+
+// 接收父组件传过来的参数
+const acceptParams = (params?: any): void => {
+    drawer.value = params.drawer;
+    drawerProps.value=params.rowData.map((item: any) => {
+        return {
+            word: item.words
+        }
+    });
+}
+const handleTitle = (row: any) => {
+    emit("setHonourTitleEvent", row.word)
+}
+const handleTeach = (row: any) => {
+  console.log(proTableRef.value.searchParam);
+  proTableRef.value.searchParam={name:row.word,role:"1"}
+    // emit("setTeachEvent", row.word)
+}
+const handleStu = (row: any) => {
+  console.log(proTableRef.value.searchParam);
+  proTableRef.value.searchParam={name:row.word,role:"2"}
+  // emit("setStuEvent", row.word)
+}
+
 
 // 获取 ProTable 元素，调用其获取刷新数据方法（还能获取到当前查询参数，方便导出携带参数）
 const proTableRef = ref<any>(null);
@@ -51,6 +101,9 @@ const addEvent = (row: any) => {
 
 type Emits = {
 	(e: "rightAddEvent", val: string): void;
+  (e: "setTeachEvent", val: string): void;
+	(e: "setStuEvent", val: string): void;
+	(e: "setHonourTitleEvent", val: string): void;
 };
 const emit=defineEmits<Emits>();
 // 如果表格需要初始化请求参数，直接定义传给 ProTable(之后每次请求都会自动带上该参数，此参数更改之后也会一直带上，改变此参数会自动刷新表格数据)
@@ -89,7 +142,6 @@ onMounted(() => {
 
 // 表格配置项
 const columns: ColumnProps[] = [
-  {type: "selection", fixed: "left", width: 80},
   {type: "index", label: "#", width: 80},
   {
     prop: "username",
@@ -115,6 +167,8 @@ const columns: ColumnProps[] = [
 defineExpose({
   proTableRef,
   drawerVisible,
-  setNameAndRoleEvent
+  setNameAndRoleEvent,
+  acceptParams,
+  drawer
 })
 </script>

@@ -51,7 +51,7 @@
 
 <script setup lang="ts" name="UploadImgMultiple">
 import {computed, inject, ref} from "vue";
-import {Plus} from "@element-plus/icons-vue";
+import {Plus,Delete,ZoomIn} from "@element-plus/icons-vue";
 import {uploadImg} from "@/service/api/upload";
 import type {UploadFile, UploadProps, UploadRequestOptions, UploadUserFile} from "element-plus";
 import {ElNotification, formContextKey, formItemContextKey} from "element-plus";
@@ -132,7 +132,7 @@ const beforeUpload: UploadProps["beforeUpload"] = rawFile => {
  * */
 const handleHttpUpload = async (options: UploadRequestOptions) => {
   let formData = new FormData();
-  formData.append("file", options.file);
+  formData.append("files", options.file);
   try {
     const api = props.api ?? uploadImg;
     const {data} = await api(formData);
@@ -150,7 +150,8 @@ interface UploadEmits {
 const emit = defineEmits<UploadEmits>();
 const uploadSuccess = (response: { fileUrl: string } | undefined, uploadFile: UploadFile) => {
   if (!response) return;
-  uploadFile.url = response.fileUrl;
+  console.log(response);
+  uploadFile.url = response[0].fullFilePath;
   emit("update:fileList", fileList.value);
   // 调用 el-form 内部的校验方法（可自动校验）
   formItemContext?.prop && formContext?.validateField([formItemContext.prop as string]);

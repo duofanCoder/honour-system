@@ -22,26 +22,7 @@
               </UploadImg>
             </div>
             <div class="mt-5">
-              <el-upload
-                  v-model:file-list="fileList"
-                  action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
-                  list-type="picture-card"
-                  :on-preview="handlePictureCardPreview"
-                  :on-remove="handleRemove"
-              >
-                <el-icon>
-                  <Plus/>
-                </el-icon>
-                <template #tip>
-                  <div class="el-upload__tip">
-                    jpg/png files with a size less than 2mb
-                  </div>
-                </template>
-              </el-upload>
-
-              <el-dialog v-model="dialogVisible">
-                <img w-full :src="dialogImageUrl" alt="Preview Image"/>
-              </el-dialog>
+             <UploadImgs  v-model:fileList="imageList" />
             </div>
             <div>
               <el-tag>上传的第一张照片会作为荣誉推荐的第一张图片,上传文件仅支持jpg, jpeg, png 最多支持6个文件</el-tag>
@@ -84,12 +65,19 @@
                 ></el-date-picker>
               </el-form-item>
               <el-form-item label="获奖学期" prop="term">
-                <el-input v-model="honourModel.term"></el-input>
+                <el-select v-model="honourModel.term" placeholder="请选择">
+                  <el-option
+                      v-for="item in termOptions"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                  ></el-option>
+                </el-select>
               </el-form-item>
               <el-form-item label="获得者">
                 <el-button class="my-0" type="primary" @click="handleTabAction('add')">添加</el-button>
                 <el-table :data="actTableData" style="width: 700px; height: 600px;">
-                  <el-table-column prop="index" label="序号"/>
+                  <el-table-column type="index" width="50" />
                   <el-table-column prop="name" label="姓名"/>
                   <el-table-column prop="role" label="角色">
                     <template #default="{ row }">
@@ -121,40 +109,44 @@
       </el-scrollbar>
     </el-card>
   </div>
- 
-  <LeftDrawer ref="leftDrawerRef" @set-honour-title-event="setHonourTitleEvent" @set-stu-event="setStuEvent" @set-teach-event="setTeachEvent"></LeftDrawer>
-  <RightDrawer ref="rightDrawerRef" @right-add-event="rightAddEvent"/>
+  <RightDrawer ref="rightDrawerRef"  @right-add-event="rightAddEvent"   @set-honour-title-event="setHonourTitleEvent" @set-stu-event="setStuEvent" @set-teach-event="setTeachEvent"/>
 </template>
 
 <script setup lang="ts">
-import {Plus} from '@element-plus/icons-vue'
 import {reactive, ref} from "vue";
-import {categoryOptions, clazzOptions, Dto, levelOptions} from "@/model";
+import {categoryOptions,termOptions, clazzOptions, Dto, levelOptions} from "@/model";
 import UploadImg from "@/components/common/Upload/Img.vue";
+import UploadImgs from "@/components/common/Upload/Imgs.vue";
+
 import getTextFromImage from "@/service/api/img2word";
-import LeftDrawer from './components/LeftDrawer.vue';
 import RightDrawer from './components/RightDrawer.vue';
 import { unref } from 'vue';
 import { toRaw } from 'vue';
+import { fetchSaveHonour } from "@/service";
+import { useTabStore } from "@/store";
+import { useRoute } from "vue-router";
+import { router } from "@/router";
 
-
+const tabStore=useTabStore()
 // clazzOptions通过value 获取label 
 const getClazzLabel = (value: string) => {
   return clazzOptions.find(item => item.value === value)?.label
 }
 const imageUrl = ref('')
-const leftDrawerRef = ref<any>(null)
-
+const imageList = ref([])
 
 const handleImg2Word = async () => {
   if (!imageUrl.value) {
     ElMessage.error('请上传图片')
     return
   }
-  leftDrawerRef.value.acceptParams( {drawer:true,rowData:await getTextFromImage(imageUrl.value)})
+  rightDrawerRef.value.acceptParams( {drawer:true,rowData:await getTextFromImage(imageUrl.value)})
 }
+const route = useRoute();
 const backRoot = () => {
-  ElMessage.info('backRoot')
+  tabStore.removeTab(route.fullPath)
+  tabStore.cacheTabRoutes()
+  router.push({path:"/admin/root"})
 }
 
 const honourModel = reactive<Partial<Dto.Honour>>({})
@@ -178,24 +170,18 @@ const rules = {
   ],
 }
 
-
 //图片上传相关
-const dialogImageUrl = ref('')
-const dialogVisible = ref(false)
-const fileList = ref([])
-const handlePictureCardPreview = (file: any) => {
-  dialogImageUrl.value = file.url
-  dialogVisible.value = true
-}
-const handleRemove = (file: any, fileList: any) => {
-  console.log(file, fileList)
-}
 const actTableData = ref<Array<any>>([])
 const rightDrawerRef=ref<any>(null)
 const handleTabAction=(action:string,row?:any)=>{
   switch (action) {
     case 'add':
-      rightDrawerRef.value.drawerVisible=true;
+    honourModel.thumbList=imageList.value.map((item:any)=>item.url)
+      fetchSaveHonour(toRaw(unref(honourModel))).then(res=>{
+          if(res.error==null){
+            ElMessage.success('保存成功');
+          }
+      })
       break;
     case 'remove':
       // 删除actTableData
@@ -204,10 +190,6 @@ const handleTabAction=(action:string,row?:any)=>{
   }
 }
 const rightAddEvent=(data:any):Boolean=>{
-  console.log("heee");
-  console.log(toRaw(unref(data)));
-  console.log(toRaw(unref(actTableData.value)));
-  
   // 查询是否存在过了
   if(actTableData.value.findIndex((item:any)=>item.id===toRaw(unref(data)).id)>-1){
     ElMessage.error('已存在')

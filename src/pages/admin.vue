@@ -38,7 +38,7 @@
         @tab-remove="tabRemove"
       >
         <el-tab-pane
-          v-for="item in tab.tabs"
+          v-for="item in getTabRef"
           :key="item.fullPath"
           :closable="item.meta.title?.toString() != 'root'"
           :label="item.meta.title?.toString()"
@@ -93,9 +93,14 @@
   import { ref } from 'vue';
   import { TabsPaneContext } from 'element-plus/es/components/tabs';
   import { onMounted } from 'vue';
+import { computed } from 'vue';
   const tab = useTabStore();
   const route = useRoute();
   const router = useRouter();
+
+  const getTabRef =computed(() => {
+    return tab.tabs;
+  });
 
   const tabsMenuValue = ref(route.fullPath);
   const handleOpen = (key: string, keyPath: string[]) => {

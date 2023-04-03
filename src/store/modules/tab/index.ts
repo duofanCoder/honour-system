@@ -9,6 +9,7 @@ import {
 } from './helpers';
 import { RouteLocationNormalizedLoaded, Router } from 'vue-router';
 import { useRouterPush } from '@/router/router';
+import { App } from '@/typings/app';
 
 interface TabState {
   /** 多页签数据 */
@@ -50,7 +51,7 @@ export const useTabStore = defineStore('app-tab', {
     /** 缓存页签路由数据 */
     cacheTabRoutes() {
       const store = useStorage('multiTabRoutes', this.tabs);
-      store.value=this.tabs;
+      store.value = this.tabs;
       console.log(this.tabs);
       // window.localStorage.setItem('multiTabRoutes', this.tabs);
     },
@@ -116,7 +117,6 @@ export const useTabStore = defineStore('app-tab', {
      */
     async removeTab(fullPath: string) {
       const { routerPush } = useRouterPush(false);
-
       const isActive = this.activeTab === fullPath;
       const updateTabs = this.tabs.filter((tab) => tab.fullPath !== fullPath);
       if (!isActive) {
