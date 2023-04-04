@@ -1,5 +1,6 @@
 import { NO_ERROR_MSG_CODE, ERROR_MSG_DURATION } from '@/model';
 import { consoleWarn } from '../common';
+import { ElMessage } from 'element-plus';
 
 /** 错误消息栈，防止同一错误同时出现 */
 const errorMsgStack = new Map<string | number, string>([]);
@@ -24,7 +25,7 @@ export function showErrorMsg(error: Service.RequestError) {
     if (!hasErrorMsg(error)) {
       addErrorMsg(error);
       consoleWarn(error.code, error.msg);
-      window.$message?.error(error.msg, { duration: ERROR_MSG_DURATION });
+      ElMessage.error(error.msg);
       setTimeout(() => {
         removeErrorMsg(error);
       }, ERROR_MSG_DURATION);

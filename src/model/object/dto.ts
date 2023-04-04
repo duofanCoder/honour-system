@@ -52,6 +52,7 @@ export declare namespace Dto {
     updateTime: string;
     actTime: string;
     actTea: User[];
+    actUsers: string;
     actStu: User[];
     // 级别
     levelId: string;

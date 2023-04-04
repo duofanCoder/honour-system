@@ -30,7 +30,7 @@ export const useUserStore = defineStore({
 
       // 先把token存储到缓存中
       const { prefix, token } = backendToken;
-      setToken(prefix + token);
+      setToken(prefix + ' ' + token);
 
       // 获取用户信息
       const { data } = await fetchUserInfo();
@@ -47,15 +47,12 @@ export const useUserStore = defineStore({
         // 更新状态
         Object.assign(this, { userInfo: data, token: prefix + token });
         // 跳转登录后的地址
-        if (isAdmin) {
-          routerPush({ name: 'admin' });
-        }
-        toLoginRedirect();
+        routerPush({ path: '/admin/root' });
 
         // 登录成功弹出欢迎提示
         window.$notification?.success({
           title: '登录成功!',
-          content: `欢迎回来，${data.nickname}!`,
+          content: `欢迎回来，${data.name}!`,
           duration: 3000,
         });
       } else {

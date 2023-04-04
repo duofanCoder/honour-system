@@ -28,12 +28,13 @@
     </div>
     <div class="lg:px-60 md:px-50 sm:px-30 px-20 grid lg:grid-cols-2 md:grid-cols-1">
       <div
+        v-if="dataTable != null && dataTable.list.length > 0"
         class="w-full mr-6 mb-6 pr-8"
-        v-for="(item, index) in [1, 2, 3, 4, 5, 6, 7, 8, 9]"
+        v-for="(item, index) in dataTable.list"
         :key="index"
         @click="toDetail(item)"
       >
-        <HonourCard />
+        <HonourCard :honour="item" />
       </div>
     </div>
     <!-- footer -->
@@ -48,11 +49,39 @@
 </template>
 <script setup lang="ts">
   import { router } from '@/router';
+  import { fetchQueryHonour } from '@/service';
+  import { ref } from 'vue';
+  import { onMounted } from 'vue';
+  import { reactive } from 'vue';
+
+  const initParam = reactive({
+    aproveStatus: '1',
+    recommendStatus: '1',
+  });
+
+  const dataTable = ref<null | any>(null);
+
+  const getTableList = (params: any) => {
+    let newParams = JSON.parse(JSON.stringify(params));
+    return fetchQueryHonour({ query: newParams, pageNum: 0, size: 999 });
+  };
+  const dataCallback = (data: any) => {
+    return {
+      list: data.records,
+      total: data.total,
+      pageNum: data.current,
+      pageSize: data.size,
+    };
+  };
+
+  onMounted(() => {
+    getTableList(initParam).then((res) => {
+      dataTable.value = dataCallback(res.data) as any;
+    });
+  });
 
   const toDetail = (item: any) => {
-    console.log('niho');
-
-    router.push({ path: '/detail', query: { id: item } });
+    router.push({ path: '/detail', query: { id: item.id } });
   };
 </script>
 <style scoped></style>

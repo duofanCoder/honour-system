@@ -1,5 +1,5 @@
 import { request } from '../request';
-import { Condition, Dto } from '@/model';
+import { Dto } from '@/model';
 
 /**
  * 登录
@@ -8,7 +8,7 @@ import { Condition, Dto } from '@/model';
  * @param type - 登录方式: pwd - 密码登录; sms - 验证码登录
  */
 export function fetchLogin(username: string, password: string) {
-  return request.post<Dto.Token>('/user/login', { username, password });
+  return request.post<Dto.Token>(`/passport/login?username=${username}&password=${password}`);
 }
 
 /** 获取用户信息 */

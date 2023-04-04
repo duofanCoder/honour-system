@@ -38,29 +38,30 @@
 </template>
 <script lang="ts" setup>
   import { reactive, ref } from 'vue';
-  // import { login } from "@/api/login";
-  import { useRouter } from 'vue-router';
-
-  const loginFormRef = ref(null);
+  import { toRaw } from 'vue';
+  import { unref } from 'vue';
+  import { useUserStore } from '@/store';
+  import { FormInstance } from 'element-plus';
+  const loginFormRef = ref<FormInstance>();
   const loginForm = reactive({
     username: '',
     password: '',
   });
+  const store = useUserStore();
   const loginRules = ref({
     username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
     password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
   });
-  const router = useRouter();
-
   const onLogin = () => {
-    // (loginFormRef as any).validate(async (valid: any) => {
-    //   if (!valid) return;
-    // const res = await login(loginForm.value);
-    // if (res.code === 200) {
-    //   router.push("/home");
-    // }
-    // });
-    router.push({ path: '/admin/root' });
-    console.log('hello');
+    if (!loginFormRef.value) return;
+    loginFormRef.value.validate((valid) => {
+      if (valid) {
+        const info = toRaw(unref(loginForm));
+        store.login(info.username, info.password);
+      } else {
+        return false;
+      }
+    });
+    // 密码校验
   };
 </script>

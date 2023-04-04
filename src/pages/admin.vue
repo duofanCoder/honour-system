@@ -29,56 +29,55 @@
       </el-menu>
     </div>
     <div class="w-full h-full flex flex-col w-[calc(100vw-240px)]">
-    <div class="flex ">
-      <el-tabs
-        class="px-6 mt-4 flex flex-col"
-        type="card"
-        @tab-click="tabClick"
-        v-model="tabsMenuValue"
-        @tab-remove="tabRemove"
-      >
-        <el-tab-pane
-          v-for="item in getTabRef"
-          :key="item.fullPath"
-          :closable="item.meta.title?.toString() != 'root'"
-          :label="item.meta.title?.toString()"
-          :name="item.name?.toString()"
+      <div class="flex">
+        <el-tabs
+          class="px-6 mt-4 flex flex-col"
+          type="card"
+          @tab-click="tabClick"
+          v-model="tabsMenuValue"
+          @tab-remove="tabRemove"
         >
-        </el-tab-pane>
-      </el-tabs>
-      <div class="flex px-4 w-full border-b border-gray-100">
-        <div class="flex gap-4 ml-auto py-4">
-          <div class="self-center cursor-pointer">
-            <el-avatar class="hover:(bg-gray-300)">
-              <i-ep-full-screen class="align-middle"
-            /></el-avatar>
-          </div>
-          <div class="self-center cursor-pointer">
-            <el-avatar class="hover:(bg-gray-300)">
-              <i-ep-refresh class="align-middle"
-            /></el-avatar>
-          </div>
-
-          <div class="cursor-pointer mr-4">
-            <el-dropdown>
-              <div class="flex items-center gap-4">
-                <el-avatar
-                  size="default"
-                  src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
-                />
-                <div class="text-base font-medium"> 多凡 </div>
-              </div>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item>修改密码</el-dropdown-item>
-                  <el-dropdown-item>退出登录</el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
+          <el-tab-pane
+            v-for="item in getTabRef"
+            :key="item.fullPath"
+            :closable="item.meta.title?.toString() != 'root'"
+            :label="item.meta.title?.toString()"
+            :name="item.name?.toString()"
+          >
+          </el-tab-pane>
+        </el-tabs>
+        <div class="flex px-4 w-full border-b border-gray-100">
+          <div class="flex gap-4 ml-auto py-4">
+            <div class="self-center cursor-pointer">
+              <el-avatar class="hover:(bg-gray-300)">
+                <i-ep-full-screen class="align-middle"
+              /></el-avatar>
+            </div>
+            <div class="self-center cursor-pointer">
+              <el-avatar class="hover:(bg-gray-300)">
+                <i-ep-refresh class="align-middle"
+              /></el-avatar>
+            </div>
+            <div class="cursor-pointer mr-4">
+              <el-dropdown>
+                <div class="flex items-center gap-4">
+                  <el-avatar
+                    size="default"
+                    src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
+                  />
+                  <div class="text-base font-medium"> {{ userStore.userInfo.name }} </div>
+                </div>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item>修改密码</el-dropdown-item>
+                    <el-dropdown-item>退出登录</el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </div>
           </div>
         </div>
       </div>
-</div>
       <div class="px-5.5">
         <router-view></router-view>
       </div>
@@ -88,17 +87,18 @@
 
 <script setup lang="ts">
   import { watch } from 'vue';
-  import { useTabStore } from '@/store';
+  import { useTabStore, useUserStore } from '@/store';
   import { useRoute, useRouter } from 'vue-router';
   import { ref } from 'vue';
   import { TabsPaneContext } from 'element-plus/es/components/tabs';
   import { onMounted } from 'vue';
-import { computed } from 'vue';
+  import { computed } from 'vue';
   const tab = useTabStore();
   const route = useRoute();
   const router = useRouter();
 
-  const getTabRef =computed(() => {
+  const userStore = useUserStore();
+  const getTabRef = computed(() => {
     return tab.tabs;
   });
 
@@ -135,6 +135,8 @@ import { computed } from 'vue';
   watch(
     () => route.fullPath,
     () => {
+      ElMessage.info('路由变化' + route.fullPath);
+      tabsMenuValue.value = route.fullPath;
       tab.addTab(route);
       tab.setActiveTab(route.fullPath);
       tab.cacheTabRoutes();

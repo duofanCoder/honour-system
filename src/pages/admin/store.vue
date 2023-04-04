@@ -1,270 +1,170 @@
 <template>
   <div>
-    <el-card class="overflow-hidden overscroll-auto">
-      <el-form
-          label-width="100px"
-          size="large"
-          :inline="true"
-          :model="queryHonourModel"
-          class="justify-center items-center flex "
+    <el-card>
+      <ProTable
+        ref="proTable"
+        title="荣誉库"
+        :columns="columns"
+        :requestApi="getTableList"
+        :initParam="initParam"
+        :dataCallback="dataCallback"
       >
-        <el-form-item label="荣誉名称">
-          <el-input v-model="queryHonourModel.title" class=""/>
-        </el-form-item>
-        <el-form-item label="获得者">
-          <el-input v-model="queryHonourModel.actUser" class=""/>
-        </el-form-item>
-        <el-form-item label="班级">
-          <el-select v-model="queryHonourModel.clazz" class="">
-            <el-option
-                v-for="item in HonourTypeOptions"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="学期">
-          <el-select v-model="queryHonourModel.term" class="">
-            <el-option
-                v-for="item in HonourTypeOptions"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="荣誉类别">
-          <el-select v-model="queryHonourModel.categoryId" class="">
-            <el-option
-                v-for="item in HonourTypeOptions"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="荣誉级别">
-          <el-select v-model="queryHonourModel.levelId" class="">
-            <el-option
-                v-for="item in HonourTypeOptions"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="获奖事件起">
-          <div class="block">
-            <el-date-picker
-                v-model="queryHonourModel.actCreateTime"
-                type="datetime"
-            />
-          </div>
-        </el-form-item>
-        <el-form-item label="获奖事件止">
-          <div class="block">
-            <el-date-picker
-                v-model="queryHonourModel.actEndTime"
-                type="datetime"
-            />
-          </div>
-        </el-form-item>
-        <el-form-item>
-          <el-button-group>
-            <el-button type="primary"> 首页推荐</el-button>
-            <el-button type="danger">取消推荐</el-button>
-          </el-button-group>
-        </el-form-item>
-        <el-form-item>
-          <el-button @click="queryHonour()">查询</el-button>
-        </el-form-item>
-      </el-form>
-      <el-table
-          size="large"
-          ref="tableRef"
-          height="660"
-          @selection-change="handleSelectionChange"
-          :data="tableData"
-          style="width: 100%"
-      >
-        <el-table-column type="selection" width="55"/>
-        <el-table-column fixed prop="id" label="序号" width="150"/>
-        <el-table-column prop="title" label="荣誉名称" width="120"/>
-        <el-table-column prop="levelId" label="级别" width="120"/>
-        <el-table-column prop="categoryId" label="类别" width="120"/>
-        <el-table-column label="关联教师" width="120">
-          <template #default="{ row }">
-            <el-tag size="small">教师1</el-tag>
-            <el-tag size="small">教师2</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="关联关联" width="120">
-          <template #default="{ row }">
-            <el-tag size="small">关联1</el-tag>
-            <el-tag size="small">关联2</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="学期" width="120">
-          <template #default="{ row }">
-            <el-tag size="small">学期1</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="获奖日期" width="120">
-          <template #default="{ row }">
-            {{ row.actTime }}
-          </template>
-        </el-table-column>
-        <el-table-column label="审核状态" width="120">
-          <template #default="{ row }">
-            <el-tag type='warning' v-if="row.aproveStatus=='0'">待审核</el-tag>
-            <el-tag type='danger' v-if="row.aproveStatus=='1'">待审核</el-tag>
-            <el-tag v-if="row.aproveStatus=='3'">审核通过</el-tag>
-          </template>
-        </el-table-column>
-
-        <el-table-column label="推荐状态" width="120">
-          <template #default="{ row }">
-            <el-tag type="warning" v-if="row.recommendStatus=='0'">未推荐</el-tag>
-            <el-tag v-if="row.recommendStatus=='1'">推荐</el-tag>
-          </template>
-        </el-table-column>
-
-        <el-table-column label="荣誉状态" width="120">
-          <template #default="{ row }">
-            <el-button type="primary" link @click="openHonourStatus(row)">查看</el-button>
-          </template>
-        </el-table-column>
-
-        <el-table-column fixed="right" label="操作" width="120">
-          <template #default="{row}">
-            <el-button type="primary" link @click="openDrawer('编辑', row)">编辑</el-button>
-            <el-button link type="primary" size="small">删除</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-      <div class="ml-auto mt-4">
-        <el-pagination
-            v-model:current-page="pageInfo.pageNum"
-            v-model:page-size="pageInfo.pageSize"
-            :page-sizes="[10, 20, 30]"
-            szie="large"
-            layout="total, sizes, prev, pager, next, jumper"
-            :total="pageInfo.total"
-            @size-change="handleSizeChange"
-            @current-change="handleCurrentChange"
-        />
-      </div>
+        <!-- 表格 header 按钮 -->
+        <template #tableHeader="scope">
+          <el-button type="primary" size="default" :icon="Download" plain @click="downloadFile"
+            >导出荣誉数据
+          </el-button>
+        </template>
+        <!-- 表格操作 -->
+        <template #operation="scope">
+          <el-dropdown class="mr-3">
+            <el-button type="primary">
+              审核<el-icon class="el-icon--right"><arrow-down /></el-icon>
+            </el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item @click="downButton(0, '1', scope.row)">通过</el-dropdown-item>
+                <el-dropdown-item @click="downButton(0, '2', scope.row)">驳回</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+          <el-dropdown>
+            <el-button type="primary">
+              推荐<el-icon class="el-icon--right"><arrow-down /></el-icon>
+            </el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item @click="downButton(1, '1', scope.row)">推荐</el-dropdown-item>
+                <el-dropdown-item @click="downButton(1, '0', scope.row)">不推荐</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+        </template>
+      </ProTable>
     </el-card>
-
-    <HonourDrawer ref="HonourDrawerRef"/>
   </div>
 </template>
 
 <script setup lang="ts">
-import {Dto} from '@/model';
-import {onMounted, reactive, ref, watch} from 'vue';
-import HonourDrawer from './components/HonourListDrawer.vue';
-import {fetchQueryHonour, fetchSaveHonour, fetchUpdateHonour} from '@/service';
+  import { ColumnProps } from '@/components/common/ProTable/interface';
+  import { categoryOptions, levelOptions, termOptions } from '@/model';
+  import { reactive, ref } from 'vue';
+  import { fetchQueryHonour, fetchRecommendHonour, fetchApproveHonour } from '@/service';
 
-const queryHonourModel = reactive<Partial<Dto.Honour>>({});
-const HonourTypeOptions = [
-  {value: '1', label: '老师'},
-  {value: '2', label: '学生'},
-];
-const pageInfo = reactive<Dto.Page<Dto.Honour>>({
-  pageNum: 1,
-  pageSize: 10,
-});
-const tableRef = ref(null);
+  import { Download, ArrowDown } from '@element-plus/icons-vue';
+  import { covertToEnumProps } from '@/utils/common';
+  import { ElMessageBox } from 'element-plus';
 
-// 生成用户Dto.Honour数据的数组
-const generateHonourList = (count: number): Partial<Dto.Honour>[] => {
-  const HonourList: Partial<Dto.Honour>[] = [];
-  for (let i = 0; i < count; i++) {
-    HonourList.push({
-      id: i,
-      title: 'name' + i,
-      categoryId: String(i % 3),
-      levelId: String(i % 3),
-      recommendStatus: String(i % 2),
-      aproveStatus: String(i % 2),
-    });
-  }
-  return HonourList;
-};
-const tableData = ref<Partial<Dto.Honour>[]>([]);
+  // 获取 ProTable 元素，调用其获取刷新数据方法（还能获取到当前查询参数，方便导出携带参数）
+  const proTable = ref();
 
-const queryHonour = () => {
-  ElMessage.success('查询');
-};
-const handleSelectionChange = (val: Dto.Honour[]) => {
-  const sr = val.map((item) => item.id).join(',');
-  ElMessage.success('选择' + sr);
-};
+  // 如果表格需要初始化请求参数，直接定义传给 ProTable(之后每次请求都会自动带上该参数，此参数更改之后也会一直带上，改变此参数会自动刷新表格数据)
+  const initParam = reactive({
+    createrUser: undefined,
+    aproveStatus: '1',
+    actUsers: undefined,
+  });
 
-const handleSizeChange = (val: number) => {
-  pageInfo.pageSize = val;
-  ElMessage.success('每页' + val + '条');
-};
-const handleCurrentChange = (val: number) => {
-  pageInfo.pageNum = val;
-  ElMessage.success('第' + val + '页');
-};
-
-const openHonourStatus = (row: Dto.Honour) => {
-  ElMessage.success('查看' + row.id);
-}
-onMounted(() => {
-  tableData.value = generateHonourList(pageInfo.pageSize);
-  pageInfo.total = 20;
-});
-watch(
-    () => pageInfo.pageNum,
-    (val) => {
-      tableData.value = generateHonourList(pageInfo.pageSize);
-    }
-);
-
-
-/**
- * @description 获取表格数据
- * @return void
- * */
-const getTableList = async () => {
-  try {
-    // 先把初始化参数和分页参数放到总参数里面
-
-    Object.assign(
-        pageInfo,
-        {query: JSON.stringify(queryHonourModel)}
-    );
-
-    let {data} = await fetchQueryHonour(pageInfo);
-    if (data == null) {
-      return
-    }
-
-    // 解构后台返回的分页数据 (如果有分页更新分页信息)
-    const {pageNum, pageSize, total} = data;
-    pageInfo.pageNum = pageNum;
-    pageInfo.pageSize = pageSize;
-    pageInfo.total = total;
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-// 打开 drawer(新增、查看、编辑)
-const HonourDrawerRef = ref();
-const openDrawer = (title: string, rowData: Partial<Dto.Honour> = {}) => {
-  let params = {
-    title,
-    rowData: {...rowData},
-    isView: title === "查看",
-    api: title === "新增" ? fetchSaveHonour : title === "编辑" ? fetchUpdateHonour : "",
-    getTableList: getTableList
+  // dataCallback 是对于返回的表格数据做处理，如果你后台返回的数据不是 datalist && total && pageNum && pageSize 这些字段，那么你可以在这里进行处理成这些字段
+  const dataCallback = (data: any) => {
+    return {
+      list: data.records,
+      total: data.total,
+      pageNum: data.current,
+      pageSize: data.size,
+    };
   };
-  HonourDrawerRef.value.acceptParams(params);
-};
+
+  // 如果你想在请求之前对当前请求参数做一些操作，可以自定义如下函数：params 为当前所有的请求参数（包括分页），最后返回请求列表接口
+  // 默认不做操作就直接在 ProTable 组件上绑定	:requestApi="getUserList"
+  const getTableList = (params: any) => {
+    let newParams = JSON.parse(JSON.stringify(params));
+    newParams.username && (newParams.username = 'custom-' + newParams.username);
+    return fetchQueryHonour(newParams);
+  };
+
+  // 表格配置项
+  const columns: ColumnProps[] = [
+    { type: 'selection', fixed: 'left', width: 80 },
+    { type: 'index', label: '#', width: 80 },
+    {
+      prop: 'title',
+      label: '荣誉名称',
+      width: 120,
+      search: { el: 'input' },
+    },
+    {
+      prop: 'levelId',
+      label: '级别',
+      sortable: true,
+      width: 150,
+      search: { el: 'select', props: { filterable: true } },
+      enum: covertToEnumProps(levelOptions),
+      fieldNames: { label: 'dictLabel', value: 'dictValue' },
+    },
+    {
+      prop: 'categoryId',
+      width: 100,
+      sortable: true,
+      label: '类别',
+      search: { el: 'select', props: { filterable: true } },
+      enum: covertToEnumProps(categoryOptions),
+      fieldNames: { label: 'dictLabel', value: 'dictValue' },
+    },
+    {
+      prop: 'actTeach',
+      label: '关联教师',
+      width: 140,
+      search: { el: 'input' },
+    },
+    {
+      prop: 'actStu',
+      label: '关联学生',
+      width: 140,
+      search: { el: 'input' },
+    },
+    {
+      prop: 'term',
+      sortable: true,
+      label: '学期',
+      width: 130,
+      search: { el: 'select', props: { filterable: true } },
+      enum: covertToEnumProps(termOptions),
+      fieldNames: { label: 'dictLabel', value: 'dictValue' },
+    },
+    {
+      prop: 'actTime',
+      label: '获奖时间',
+      width: 140,
+      search: {
+        el: 'date-picker',
+        span: 1,
+        props: { type: 'daterange', valueFormat: 'YYYY-MM-DD' },
+        // defaultValue: ['2023-04-01', '2023-04-08'],
+      },
+    },
+    { prop: 'operation', label: '操作', fixed: 'right', width: 300 },
+  ];
+
+  const downloadFile = async () => {
+    ElMessageBox.confirm('确认导出数据?', '温馨提示', { type: 'warning' }).then(() =>
+      console.log('导出用户数据')
+    );
+  };
+
+  const downButton = (type: number, status: string, row: any) => {
+    if (type === 0) {
+      fetchApproveHonour(row.id, status).then((res) => {
+        ElMessageBox.alert('操作成功', '提示');
+        proTable.value.getTableList();
+      });
+    } else if (type === 1) {
+      fetchRecommendHonour(row.id, status).then((res) => {
+        ElMessageBox.alert('操作成功', '提示');
+        proTable.value.getTableList();
+      });
+    }
+  };
 </script>
+
+<style scoped></style>
