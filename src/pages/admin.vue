@@ -17,10 +17,10 @@
             <span>荣誉管理</span>
           </template>
           <el-menu-item index="/admin/root"> 荣誉列表 </el-menu-item>
-          <el-menu-item index="/admin/approve">荣誉审批</el-menu-item>
-          <el-menu-item index="/admin/store">荣誉库</el-menu-item>
+          <el-menu-item  v-if="userInfo.role == '0'" index="/admin/approve">荣誉审批</el-menu-item>
+          <el-menu-item v-if="userInfo.role == '0'" index="/admin/store">荣誉库</el-menu-item>
         </el-sub-menu>
-        <el-sub-menu index="2">
+        <el-sub-menu v-if="userInfo.role == '0'" index="2">
           <template #title>
             <span>用户管理</span>
           </template>
@@ -69,8 +69,8 @@
                 </div>
                 <template #dropdown>
                   <el-dropdown-menu>
-                    <el-dropdown-item>修改密码</el-dropdown-item>
-                    <el-dropdown-item>退出登录</el-dropdown-item>
+                    <el-dropdown-item @click="dialogFormVisible=true">修改密码</el-dropdown-item>
+                    <el-dropdown-item @click="logout()">退出登录</el-dropdown-item>
                   </el-dropdown-menu>
                 </template>
               </el-dropdown>
@@ -81,6 +81,17 @@
       <div class="px-5.5">
         <router-view></router-view>
       </div>
+      <el-dialog v-model="dialogFormVisible" title="修改密码" width="300px">
+        <el-input size="large" v-model="password" />
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">返回</el-button>
+        <el-button type="primary" @click="changepwWord()">
+          确认
+        </el-button>
+      </span>
+    </template>
+  </el-dialog>
     </div>
   </div>
 </template>
@@ -93,11 +104,15 @@
   import { TabsPaneContext } from 'element-plus/es/components/tabs';
   import { onMounted } from 'vue';
   import { computed } from 'vue';
+import { fetchResetUser } from '@/service';
   const tab = useTabStore();
   const route = useRoute();
   const router = useRouter();
 
   const userStore = useUserStore();
+  const userInfo =computed(() => {
+    return userStore.userInfo;
+  })
   const getTabRef = computed(() => {
     return tab.tabs;
   });
@@ -128,18 +143,34 @@
       tab.addTab(route);
     }
   };
+  const logout = () => {
+    tab.clearTab();
+    tab.$reset();
+    userStore.logout();
+  };
 
+  const dialogFormVisible = ref(false);
+  const password = ref('');
+  const changepwWord=()=>{
+    if(password.value==''){
+      ElMessage.error('密码不能为空');
+      return;
+    }
+    fetchResetUser(userStore.userInfo.id,password.value).then(res=>{
+      ElMessage.success('修改成功');
+      dialogFormVisible.value = false;
+      logout();
+    })
+  }
   onMounted(() => {
     initTabs();
   });
   watch(
     () => route.fullPath,
     () => {
-      ElMessage.info('路由变化' + route.fullPath);
       tabsMenuValue.value = route.fullPath;
       tab.addTab(route);
       tab.setActiveTab(route.fullPath);
-      tab.cacheTabRoutes();
     }
   );
 </script>

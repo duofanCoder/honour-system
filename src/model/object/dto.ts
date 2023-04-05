@@ -24,6 +24,7 @@ export declare namespace Dto {
     total?: number;
     pageNum: number;
     data?: Array<T>;
+    records?: Array<T>;
     pageSize: number;
     orderBy?: string;
   }
@@ -57,7 +58,8 @@ export declare namespace Dto {
     // 级别
     levelId: string;
     category: string;
-    thumbList: string[];
+    actUsersName: string;
+    thumbList: string;
     // 类别
     categoryId: string;
     level: string;
@@ -73,12 +75,12 @@ export declare namespace Dto {
   }
 
   interface History {
-    id: number;
+    id: string;
     title: string;
     description: string;
     createTime: string;
     updateTime: string;
-    honourId: number;
+    honourId: string;
     reason: string;
     color: string;
     remark: string;

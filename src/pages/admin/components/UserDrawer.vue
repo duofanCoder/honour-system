@@ -94,14 +94,14 @@ const handleSubmit = () => {
   ruleFormRef.value!.validate(async valid => {
     if (!valid) return;
     try {
-      await drawerProps.value.api!(drawerProps.value.rowData);
-
-      ElMessage.success({message: `${drawerProps.value.title}用户成功！`});
-      if (!isUndefined(drawerProps.value.getTableList)) {
-        drawerProps.value.getTableList();
+      const {error}=await drawerProps.value.api!(drawerProps.value.rowData);
+      if(error==null){
+        ElMessage.success({message: `${drawerProps.value.title}用户成功！`});
+        if (!isUndefined(drawerProps.value.getTableList)) {
+          drawerProps.value.getTableList();
+        }
+        drawerVisible.value = false;
       }
-      drawerVisible.value = false;
-      console.log(drawerVisible.value);
     } catch (error) {
       console.log(error);
     }

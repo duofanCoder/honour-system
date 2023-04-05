@@ -56,9 +56,10 @@
 
 <script setup lang="ts">
   import { ColumnProps } from '@/components/common/ProTable/interface';
-  import { clazzOptions, Dto, roleOptions } from '@/model';
+  import { clazzOptions, Dto, roleOptions, roleOptions1 } from '@/model';
   import { reactive, ref } from 'vue';
   import {
+fetchFileDownload,
     fetchQueryUser,
     fetchRemoveUser,
     fetchResetUser,
@@ -118,6 +119,9 @@
     {
       prop: 'clazz',
       label: '班级',
+      enum: covertToEnumProps(clazzOptions),
+      search: { el: 'select', props: { filterable: true } },
+      fieldNames: { label: 'dictLabel', value: 'dictValue' },
       width: 140,
     },
     {
@@ -125,7 +129,7 @@
       label: '角色',
       width: 70,
       search: { el: 'select', props: { filterable: true } },
-      enum: covertToEnumProps(roleOptions),
+      enum: covertToEnumProps(roleOptions1),
       fieldNames: { label: 'dictLabel', value: 'dictValue' },
     },
     {
@@ -162,7 +166,7 @@
   // 导出用户列表
   const downloadFile = async () => {
     ElMessageBox.confirm('确认导出用户数据?', '温馨提示', { type: 'warning' }).then(() =>
-      console.log('导出用户数据')
+      fetchFileDownload(1)
     );
   };
 

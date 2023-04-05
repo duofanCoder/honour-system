@@ -22,7 +22,7 @@
               </UploadImg>
             </div>
             <div class="mt-5">
-              <UploadImgs v-model:fileList="imageList" />
+              <UploadImgs ref="uploadImgsRef" v-model:fileList="imageList" />
             </div>
             <div>
               <el-tag
@@ -119,15 +119,15 @@
           </div>
         </div>
       </el-scrollbar>
+      <RightDrawer
+          ref="rightDrawerRef"
+          @right-add-event="rightAddEvent"
+          @set-honour-title-event="setHonourTitleEvent"
+          @set-stu-event="setStuEvent"
+          @set-teach-event="setTeachEvent"
+        />
     </el-card>
   </div>
-  <RightDrawer
-    ref="rightDrawerRef"
-    @right-add-event="rightAddEvent"
-    @set-honour-title-event="setHonourTitleEvent"
-    @set-stu-event="setStuEvent"
-    @set-teach-event="setTeachEvent"
-  />
 </template>
 
 <script setup lang="ts">
@@ -140,14 +140,15 @@
   import RightDrawer from './components/RightDrawer.vue';
   import { unref } from 'vue';
   import { toRaw } from 'vue';
-  import { fetchSaveHonour } from '@/service';
+  import { fetchHonour, fetchSaveHonour } from '@/service';
   import { useTabStore } from '@/store';
   import { useRoute } from 'vue-router';
   import { router } from '@/router';
   import { ElMessage } from 'element-plus';
-
+  import { onMounted } from 'vue';
+  
+  const uploadImgsRef=ref(null);
   const tabStore = useTabStore();
-  // clazzOptions通过value 获取label
   const getClazzLabel = (value: string) => {
     return clazzOptions.find((item) => item.value === value)?.label;
   };
@@ -170,6 +171,7 @@
     tabStore.cacheTabRoutes();
     router.push({ path: '/admin/root' });
   };
+  const honourId=route.query.id as string || "";
 
   const honourModel = reactive<Partial<Dto.Honour>>({});
   // form 约束
@@ -185,12 +187,12 @@
   };
 
   //图片上传相关
-  const actTableData = ref<Array<any>>([]);
+  const actTableData = ref<Array<any>>(Array(0));
   const rightDrawerRef = ref<any>(null);
   const handleTabAction = (action: string, row?: any) => {
     switch (action) {
       case 'add':
-        honourModel.thumbList = imageList.value.map((item: any) => item.url);
+        honourModel.thumbList = imageList.value.map((item: any) => item.url).join(",");
         honourModel.actUsers = toRaw(unref(actTableData))
           .map((item: any) => item.id)
           .join(',');
@@ -210,7 +212,6 @@
     }
   };
   const rightAddEvent = (data: any): Boolean => {
-    // 查询是否存在过了
     if (actTableData.value.findIndex((item: any) => item.id === toRaw(unref(data)).id) > -1) {
       ElMessage.error('已存在');
       return false;
@@ -230,6 +231,43 @@
     rightDrawerRef.value.drawerVisible = true;
     rightDrawerRef.value.setNameAndRoleEvent(data, '1');
   };
+
+  
+  onMounted(()=>{
+    if(honourId!=""){
+    fetchHonour(honourId).then(res=>{
+      if(res.error==null){
+          honourModel.id=honourId;
+          honourModel.title=res.data.title;
+          honourModel.levelId=res.data.levelId;
+          honourModel.categoryId=res.data.categoryId;
+          honourModel.actTime=res.data.actTime;
+          honourModel.term=res.data.term;
+          honourModel.thumbList=res.data.thumbList;
+          honourModel.actUsers=res.data.actUsers;
+        if(res.data.actStu){
+          res.data.actStu.forEach((item: any) => {
+            rightAddEvent(item)
+          });
+        }
+        if(res.data.actTea){
+          res.data.actTea.forEach((item: any) => {
+            rightAddEvent(item)
+          });
+        }
+        if(res.data.thumbList != null && res.data.thumbList!="" && res.data.thumbList.length>0){
+          imageList.value=res.data.thumbList.split(",").map((item:string)=>{return {url:item}})
+          console.log(imageList.value);
+          if(uploadImgsRef.value!=null){
+            if(uploadImgsRef.value.fileList!=null){
+              uploadImgsRef.value.fileList=imageList.value;
+            }
+          }
+        }
+      }
+    })
+  }
+  })
 </script>
 
 <style scoped>

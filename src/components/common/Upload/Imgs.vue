@@ -55,6 +55,7 @@ import {Plus,Delete,ZoomIn} from "@element-plus/icons-vue";
 import {uploadImg} from "@/service/api/upload";
 import type {UploadFile, UploadProps, UploadRequestOptions, UploadUserFile} from "element-plus";
 import {ElNotification, formContextKey, formItemContextKey} from "element-plus";
+import { def } from "@vue/shared";
 
 type FileTypes =
     | "image/apng"
@@ -150,7 +151,6 @@ interface UploadEmits {
 const emit = defineEmits<UploadEmits>();
 const uploadSuccess = (response: { fileUrl: string } | undefined, uploadFile: UploadFile) => {
   if (!response) return;
-  console.log(response);
   uploadFile.url = response[0].fullFilePath;
   emit("update:fileList", fileList.value);
   // 调用 el-form 内部的校验方法（可自动校验）
@@ -193,6 +193,10 @@ const handlePictureCardPreview: UploadProps["onPreview"] = uploadFile => {
   viewImageUrl.value = uploadFile.url!;
   imgViewVisible.value = true;
 };
+
+defineExpose({
+  fileList
+});
 </script>
 
 <style scoped lang="scss">

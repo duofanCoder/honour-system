@@ -33,8 +33,8 @@ export function fetchUpdateProfile(user: any) {
   return request.post('/user/profile', user);
 }
 
-export function fetchResetUser(id: string) {
-  return request.put('/user/reset' + `/${id}/123456`, {});
+export function fetchResetUser(id: string, password = '123456') {
+  return request.put('/user/reset' + `/${id}/${password}`, {});
 }
 
 export function fetchPasswordUser(password: string) {

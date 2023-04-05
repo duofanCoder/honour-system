@@ -9,7 +9,9 @@
           :index="index"
         >
           <el-form-item :label="`${item.label} :`">
+          <div>
             <SearchFormItem :column="item" :searchParam="searchParam" />
+          </div>
           </el-form-item>
         </GridItem>
         <GridItem suffix>

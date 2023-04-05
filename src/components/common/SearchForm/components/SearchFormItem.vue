@@ -1,10 +1,10 @@
 <template>
-  <component
+    <component
     size="default"
     v-if="column.search?.el"
     :is="`el-${column.search.el}`"
     v-bind="handleSearchProps"
-    v-model="searchParam[column.search.key ?? handleProp(column.prop)]"
+		v-model="searchParam[column.search.key ?? handleProp(column.prop!)]"
     :data="column.search?.el === 'tree-select' ? columnEnum : []"
     :options="['cascader', 'select-v2'].includes(column.search?.el) ? columnEnum : []"
     :placeholder="placeholder"
@@ -30,7 +30,7 @@
   </component>
 </template>
 
-<script setup lang="ts" name="searchFormItem">
+<script setup lang="ts">
   import { computed, inject, ref } from 'vue';
   import { ColumnProps } from '@/components/common/ProTable/interface';
 

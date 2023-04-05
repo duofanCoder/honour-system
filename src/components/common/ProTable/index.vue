@@ -182,18 +182,6 @@
   const { selectionChange, getRowKeys, selectedList, selectedListIds, isSelected } = useSelection(
     props.selectId
   );
-  // 列设置 ==> 过滤掉不需要设置显隐的列
-  const colRef = ref();
-  const colSetting = tableColumns.value!.filter((item) => {
-    return (
-      item.type !== 'selection' &&
-      item.type !== 'index' &&
-      item.type !== 'expand' &&
-      item.prop !== 'operation'
-    );
-  });
-  const openColSetting = () => colRef.value.openColSetting();
-
   // 暴露给父组件的参数和方法(外部需要什么，都可以从这里暴露出去)
   defineExpose({
     isShowSearch,

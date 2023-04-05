@@ -20,10 +20,10 @@
     </div>
 
     <div class="flex justify-between h-30 items-center lg:px-60 md:px-50 sm:px-30 px-20">
-      <div>累计47个荣誉</div>
+      <div>累计{{ dataTable!=null ?dataTable.total:"" }}个荣誉</div>
       <div class="flex gap-4">
-        <el-input size="large" placeholder="请输入内容"></el-input>
-        <ElButton size="large" type="primary">搜索</ElButton>
+        <el-input size="large" v-model="initParam.title" placeholder="请输入内容"></el-input>
+        <ElButton size="large" type="primary" @click="search()">搜索</ElButton>
       </div>
     </div>
     <div class="lg:px-60 md:px-50 sm:px-30 px-20 grid lg:grid-cols-2 md:grid-cols-1">
@@ -57,8 +57,9 @@
   const initParam = reactive({
     aproveStatus: '1',
     recommendStatus: '1',
+    title:""
   });
-
+  
   const dataTable = ref<null | any>(null);
 
   const getTableList = (params: any) => {
@@ -75,11 +76,14 @@
   };
 
   onMounted(() => {
+    search();
+  });
+
+  const search=()=>{
     getTableList(initParam).then((res) => {
       dataTable.value = dataCallback(res.data) as any;
     });
-  });
-
+  }
   const toDetail = (item: any) => {
     router.push({ path: '/detail', query: { id: item.id } });
   };

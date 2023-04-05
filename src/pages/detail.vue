@@ -6,7 +6,7 @@
         <div class="w-6 h-6 rounded-full bg-blue-500"></div>
         <div>荣誉墙</div>
       </div>
-      <div class="flex mr-14 gap-8">
+      <div class="flex gap-8">
         <router-link to="/">
           <el-button type="primary" size="large">首页</el-button>
         </router-link>
@@ -22,7 +22,7 @@
     <!-- 使用element 组件轮播图 -->
     <div class="lg:px-60 md:px-50 sm:px-30 px-20">
       <el-carousel class="mx-auto lg:px-350px md:h-300px sm:h-270px h-250px">
-        <el-carousel-item v-for="item in getUrl" :key="item" class="">
+        <el-carousel-item v-for="item in honour.thumbList" :key="item" class="">
           <ElImage fit="cover" class="w-full h-full" :src="item"></ElImage>
         </el-carousel-item>
       </el-carousel>
@@ -63,21 +63,15 @@
   import { fetchHonour } from '@/service';
   import { onMounted } from 'vue';
   import { reactive } from 'vue';
-  import { computed } from 'vue';
   import { useRoute } from 'vue-router';
   import { levelOptions, termOptions } from '@/model';
   const route = useRoute();
   const id = route.query.id || ('空' as string);
-  // 生成4张轮播图的图片
-  const imgList = Array.from({ length: 4 }, (v, k) => k + 1).map(
-    (item) => `https://picsum.photos/id/${item}/600/300`
-  );
-
   const honour = reactive({
     id: 1,
     title: '国家级荣誉',
-    thumbList:
-      'https://picsum.photos/id/1/600/300,https://picsum.photos/id/2/600/300,https://picsum.photos/id/3/600/300,https://picsum.photos/id/4/600/300',
+    thumbList:[
+      'https://picsum.photos/id/1/600/300,https://picsum.photos/id/2/600/300,https://picsum.photos/id/3/600/300,https://picsum.photos/id/4/600/300'],
     level: '国家级',
     term: '第一学期',
     teacher: '张三、李四、王五',
@@ -98,6 +92,10 @@
         honour.thumbList = res.data.thumbList;
         honour.level = getLabelByValue(res.data.levelId, levelOptions);
         honour.term = getLabelByValue(res.data.term, termOptions);
+        if(res.data.thumbList != null && res.data.thumbList!="" && res.data.thumbList.length>0){
+          honour.thumbList=res.data.thumbList.split(",")
+          console.log(honour.thumbList);
+        }
         honour.teacher =
           res.data.actTea != null ? res.data.actTea.map((item: any) => item.name).join('、') : '';
         honour.student =
@@ -105,11 +103,5 @@
       }
     });
   });
-  const getUrl = computed(() => {
-    if (!honour.thumbList)
-      return [
-        'https://bpic.588ku.com/element_origin_min_pic/19/04/10/e87e154ddafd724a915a119fb21c38b9.jpg',
-      ];
-    return honour.thumbList.split(',')[0];
-  });
+
 </script>

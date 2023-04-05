@@ -10,6 +10,16 @@
         :dataCallback="dataCallback"
       >
         <!-- 表格操作 -->
+        <template #actTea="scope">
+          <span v-for="(item,index) in scope.row!.actTea" :key="index">
+            {{ item.name }} {{ index!=scope.row.actTea.length-1?'、':'' }}
+          </span>
+			</template>
+        <template #actStu="scope">
+          <span v-for="(item,index) in scope.row!.actStu" :key="index">
+              {{ item.name }}{{ index!=scope.row.actStu.length-1?'、':'' }}
+          </span>
+			</template>
         <template #operation="scope">
           <el-dropdown class="mr-3">
             <el-button type="primary">
@@ -76,11 +86,24 @@
   // 如果你想在请求之前对当前请求参数做一些操作，可以自定义如下函数：params 为当前所有的请求参数（包括分页），最后返回请求列表接口
   // 默认不做操作就直接在 ProTable 组件上绑定	:requestApi="getUserList"
   const getTableList = (params: any) => {
+    let query=JSON.parse(params.query);
+    let names=new Array()
+    if(query.actTea){
+      names.push(query.actTea);
+    }
+    if(query.actStu){
+      names.push(query.actStu);
+    }
+    query.actTea=undefined;
+    query.actStu=undefined;
+    query.actUsers=names.join(',');
+    params.query=JSON.stringify(query);
+    console.log(params);
+    
     let newParams = JSON.parse(JSON.stringify(params));
     newParams.username && (newParams.username = 'custom-' + newParams.username);
     return fetchQueryHonour(newParams);
   };
-
   // 表格配置项
   const columns: ColumnProps[] = [
     { type: 'index', label: '#', width: 80 },
@@ -109,7 +132,7 @@
       fieldNames: { label: 'dictLabel', value: 'dictValue' },
     },
     {
-      prop: 'actTeach',
+      prop: 'actTea',
       label: '关联教师',
       width: 140,
       search: { el: 'input' },

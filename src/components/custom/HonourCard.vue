@@ -14,13 +14,17 @@
             <div class="flex flex-col gap-2">
               <div class="text-blue-400"><span class="mr-2">|</span>获奖教师</div>
               <div class="text-size-[12px] font-semibold">
-                {{ props.honour.actTea }}
+                <span v-for="(item,index) in props.honour.actTea" :key="index">
+                  {{ item.name }} {{ index!=props.honour.actTea.length-1?'、':'' }}
+                </span>
               </div>
             </div>
             <div class="flex flex-col gap-2">
               <div class="text-blue-400"><span class="mr-2">|</span>获奖学生</div>
               <div class="flex text-size-[12px] font-semibold">
-                {{ props.honour.actStu }}
+                <span v-for="(item,index) in props.honour.actStu" :key="index">
+                  {{ item.name }} {{ index!=props.honour.actStu.length-1?'、':'' }}
+                </span>
               </div>
             </div>
           </div>
