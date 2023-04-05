@@ -1,3 +1,5 @@
+import { getToken } from '@/utils';
+import axios from 'axios';
 import { request } from '../request';
 import { Dto } from '@/model';
 
@@ -6,23 +8,39 @@ export function fetchFileUpload(data: FormData) {
 }
 
 export function fetchFileDownload(data: number) {
-  if ((data = 1)) {
-    request.post('/file/download/user', {}, { responseType: 'blob' }).then((response) => {
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', 'user.xlsx'); //or any other extension
-      document.body.appendChild(link);
-      link.click();
-    });
+  if (data == 1) {
+    axios
+      .get('api/v1/file/download/user', {
+        responseType: 'blob',
+        baseURL: 'http://127.0.0.1:8080/',
+        headers: {
+          Authorization: getToken(),
+        },
+      })
+      .then((response) => {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', '用户信息.xlsx'); //or any other extension
+        document.body.appendChild(link);
+        link.click();
+      });
   } else {
-    request.post('/file/download/honour', {}, { responseType: 'blob' }).then((response) => {
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', 'honour.xlsx'); //or any other extension
-      document.body.appendChild(link);
-      link.click();
-    });
+    axios
+      .get('api/v1/file/download/honour', {
+        responseType: 'blob',
+        baseURL: 'http://127.0.0.1:8080/',
+        headers: {
+          Authorization: getToken(),
+        },
+      })
+      .then((response) => {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', '荣誉信息.xlsx'); //or any other extension
+        document.body.appendChild(link);
+        link.click();
+      });
   }
 }
